@@ -110,8 +110,7 @@ class CheckSuspiciousMarkupBuilder(Builder):
         doctree.walk(visitor)
 
     def finish(self):
-        unused_rules = [rule for rule in self.rules if not rule.used]
-        if unused_rules:
+        if unused_rules := [rule for rule in self.rules if not rule.used]:
             self.logger.warning(
                 'Found %s/%s unused rules: %s' % (
                     len(unused_rules), len(self.rules),
@@ -154,10 +153,9 @@ class CheckSuspiciousMarkupBuilder(Builder):
         self.app.statuscode = 1
 
     def write_log_entry(self, lineno, issue, text):
-        f = open(self.log_file_name, 'a')
-        writer = csv.writer(f, dialect)
-        writer.writerow([self.docname, lineno, issue, text.strip()])
-        f.close()
+        with open(self.log_file_name, 'a') as f:
+            writer = csv.writer(f, dialect)
+            writer.writerow([self.docname, lineno, issue, text.strip()])
 
     def load_rules(self, filename):
         """Load database of previously ignored issues.
@@ -176,10 +174,7 @@ class CheckSuspiciousMarkupBuilder(Builder):
                 raise ValueError(
                     "wrong format in %s, line %d: %s" % (filename, i+1, row))
             docname, lineno, issue, text = row
-            if lineno:
-                lineno = int(lineno)
-            else:
-                lineno = None
+            lineno = int(lineno) if lineno else None
             rule = Rule(docname, lineno, issue, text)
             rules.append(rule)
         f.close()
